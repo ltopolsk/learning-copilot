@@ -1,38 +1,97 @@
 import streamlit as st
-import streamlit.components.v1 as components
+from streamlit_extras.switch_page_button import switch_page
+import time
 
-# if 'genNotes' not in st.session_state:
-#     st.session_state.disabled = True
-# 
-st.markdown('<h1>Learning Copilot</h1>')
-uploaded = st.file_uploader('Dodaj prezentację123')
-clicked = st.button('Wygeneruj notatki', disabled=True, key='genNotes')
-# 
+st.set_page_config(
+    initial_sidebar_state="collapsed",
+    layout="wide"
+)
+
+st.markdown(
+    """
+<style>
+    [data-testid="collapsedControl"] {
+        display: none
+    }
+</style>
+""",
+    unsafe_allow_html=True,
+)
+
+st.markdown(
+    """
+<style>
+button {
+    height: auto;
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+    widht: 100%;
+}
+</style>
+""",
+    unsafe_allow_html=True,
+)
+
+# def clear_name():
+st.session_state.title = None
+
+def disable():
+    st.session_state.disabled = True
+
+def enable():
+    st.session_state.disabled = False
+
+def upload_file():
+    if not st.session_state.get('file_uploaded', False):
+        enable()
+    else:
+        disable()
+
+if 'genNotes' not in st.session_state:
+    st.session_state.disabled = True
+if 'genQuiz' not in st.session_state:
+    st.session_state.disabled = True
+
+sidebar, body = st.columns([1, 10])
+
+home_button = sidebar.button('HOME', key='homeButton')
+
+if home_button:
+    switch_page("st")
+
+notes_expander = sidebar.expander("NOTES")
+notes_expander.button("NOTE1")
+
+body.markdown('<h1>Learning Copilot 📚</h1>', unsafe_allow_html=True)
+uploaded = body.file_uploader(label='Dodaj plik',on_change=upload_file, type=['pdf', 'pptx'])
+title = body.text_input('Wprowadź tytuł notatek/quizu')
+
+if title is not None and title != '':
+    st.session_state.title = title
+
+col1, col2 = body.columns(2)
+clicked_notes = col1.button('Wygeneruj notatki', key='genNotes', disabled=st.session_state.disabled)
+clicked_quiz = col2.button('Wygeneruj quiz', key='genQuiz', disabled=st.session_state.disabled)
+
 if uploaded is not None:
-    st.text('HOORAY')
-# 
-# with open("style.css") as style:
-#     st.markdown(f"<style>{style.read()}</style>", unsafe_allow_html=True)
+    st.session_state.file_uploaded=True
+    bytes_data = uploaded.getvalue()
+    st.session_state.file = bytes_data
+else:
+    st.session_state.file_uploaded=False
 
-# st.markdown("""<html>
-# <body>
-# <div style="width: 100%; height: 100%; position: relative; background: white">
-#     <div style="width: 216px; height: 40px; left: 462px; top: 115px; position: absolute"></div>
-#     <div style="width: 395px; height: 75px; left: 356px; top: 106px; position: absolute; color: black; font-size: 36px; font-family: Comfortaa; font-weight: 400; word-wrap: break-word">Learning Copilot 📚 </div>
-#     <div style="width: 387px; height: 59px; left: 113px; top: 243px; position: absolute; box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25)">
-#         <div style="width: 387px; height: 59px; left: 0px; top: 0px; position: absolute; background: black; border-radius: 6px; border: 2px black solid"></div>
-#         <div style="left: 145.29px; top: 23px; position: absolute; text-align: center; color: white; font-size: 13px; font-family: Roboto; font-weight: 900; text-transform: uppercase; letter-spacing: 0.52px; word-wrap: break-word">REJESTRACJA</div>
-#     </div>
-#     <div style="width: 387px; height: 59px; left: 599px; top: 243px; position: absolute; box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25)">
-#         <div style="width: 387px; height: 59px; left: 0px; top: 0px; position: absolute; background: black; border-radius: 6px; border: 2px black solid"></div>
-#         <div style="left: 153.29px; top: 23px; position: absolute; text-align: center; color: white; font-size: 13px; font-family: Roboto; font-weight: 900; text-transform: uppercase; letter-spacing: 0.52px; word-wrap: break-word">LOGOWANIE</div>
-#     </div>
-# </div>
-# </body>r
-# </html>
-# """, unsafe_allow_html=True)
+if clicked_notes:
+    progress_text = "PROCESSING"
+    bar = body.progress(0, )
+    for percent_complete in range(100):
+        time.sleep(0.01)
+        bar.progress(percent_complete + 1, text=progress_text)
+    time.sleep(1)
+    # my_bar.empty()
+    switch_page("main_notes")
 
-# # st.markdown("<h1>Hello, World</h1>", unsafe_allow_html=True)
+
+# def process_file():
 
 # # st.write("Learning Copilot 📚")
 # # st.button("Rejestracja")
