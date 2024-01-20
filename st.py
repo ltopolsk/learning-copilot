@@ -31,22 +31,9 @@ button.st-emotion-cache-19rxjzo {
     unsafe_allow_html=True,
 )
 
-import requests
-
-def get_external_ip():
-    response = requests.get("https://api64.ipify.org?format=json")
-    if response.status_code == 200:
-        data = response.json()
-        return data
-    else:
-        return "Unknown"
-
-external_ip = get_external_ip()
-st.write("External IP:", external_ip)
-
-#db_client = DBClient(config=st.secrets["mongo"])
-# def clear_name():
-st.session_state.title = None
+db_client = DBClient(config=st.secrets["mongo"])
+def clear_name():
+    st.session_state.title = None
 
 def disable():
     st.session_state.disabled = True
@@ -73,8 +60,8 @@ if home_button:
     switch_page("st")
 
 notes_expander = sidebar.expander("NOTES")
-#for x in db_client.get_notes("Client1"):
- #   notes_expander.button(x['filename'])
+for x in db_client.get_notes("Client1"):
+   notes_expander.button(x['filename'])
 
 body.markdown('<h1>Learning Copilot 📚</h1>', unsafe_allow_html=True)
 uploaded = body.file_uploader(label='Dodaj plik',on_change=upload_file, type=['pdf', 'pptx'])
@@ -95,8 +82,8 @@ else:
     st.session_state.file_uploaded=False
 
 if clicked_notes:
-  #  with st.spinner("Processing..."):
-   #     db_client.upload_notes('Client1', bytes_data, title)
+    with st.spinner("Processing..."):
+       db_client.upload_notes('Client1', bytes_data, title)
     switch_page("main_notes")
 
 
