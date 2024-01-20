@@ -1,6 +1,7 @@
 import streamlit as st
 from streamlit_extras.switch_page_button import switch_page
 import time
+from mongo import DBClient
 
 st.set_page_config(
     initial_sidebar_state="collapsed",
@@ -21,17 +22,16 @@ st.markdown(
 st.markdown(
     """
 <style>
-button {
+button.st-emotion-cache-19rxjzo {
     height: auto;
-    padding-top: 10px !important;
-    padding-bottom: 10px !important;
-    widht: 100%;
+    width: inherit;
 }
 </style>
 """,
     unsafe_allow_html=True,
 )
 
+db_client = DBClient(config=st.secrets["mongo"])
 # def clear_name():
 st.session_state.title = None
 
@@ -60,7 +60,8 @@ if home_button:
     switch_page("st")
 
 notes_expander = sidebar.expander("NOTES")
-notes_expander.button("NOTE1")
+for x in db_client.get_notes("Client1"):
+    notes_expander.button(x['filename'])
 
 body.markdown('<h1>Learning Copilot 📚</h1>', unsafe_allow_html=True)
 uploaded = body.file_uploader(label='Dodaj plik',on_change=upload_file, type=['pdf', 'pptx'])
@@ -81,13 +82,8 @@ else:
     st.session_state.file_uploaded=False
 
 if clicked_notes:
-    progress_text = "PROCESSING"
-    bar = body.progress(0, )
-    for percent_complete in range(100):
-        time.sleep(0.01)
-        bar.progress(percent_complete + 1, text=progress_text)
-    time.sleep(1)
-    # my_bar.empty()
+    with st.spinner("Processing..."):
+        db_client.upload_notes('Client1', bytes_data, title)
     switch_page("main_notes")
 
 
