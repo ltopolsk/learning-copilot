@@ -1,11 +1,12 @@
 from pymongo.mongo_client import MongoClient
+from pymongo.server_api import ServerApi
 from gridfs import GridFS
 
 
 class DBClient:
 
     def __init__(self, config):
-        self.client = MongoClient(config['uri'])
+        self.client = MongoClient(config['uri'], server_api=ServerApi('1'))
         self.db = self.client['ZPDS-database']
         self.fs = GridFS(self.db)
 

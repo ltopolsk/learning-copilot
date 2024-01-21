@@ -1,7 +1,10 @@
 import streamlit as st
 from streamlit_extras.switch_page_button import switch_page
-import time
+import src.app.auth_test as auth
 from mongo import DBClient
+
+if st.session_state.get('user_id', None) is None:
+    switch_page('login')
 
 st.set_page_config(
     initial_sidebar_state="collapsed",
@@ -48,17 +51,17 @@ if home_button:
     switch_page("st")
 
 def get_doc(file_id, filename):
-    print(file_id)
+    # print(file_id)
     st.session_state.title = filename
     st.session_state.file = db_client.get_one_pdf(file_id)
     # switch_page("main_notes")
 
 notes_expander = sidebar.expander("NOTES")
 notes_expander_buttons = []
-for x in db_client.get_notes("Client1"):
+for x in db_client.get_notes(st.session_state.user_id):
     notes_expander_buttons.append(notes_expander.button(x['filename'], use_container_width=True, key=x["file_id"], on_click=get_doc, args=(x['file_id'],x['filename'])))
 
-print(notes_expander_buttons)
+# print(notes_expander_buttons)
 if any(notes_expander_buttons):
     switch_page("main_notes")
 # quizes_expander = sidebar.expander("QUIZES")
@@ -85,13 +88,6 @@ else:
 
 if clicked_notes:
     with st.spinner("Processing..."):
-       db_client.upload_notes('Client1', bytes_data, title)
+       db_client.upload_notes(st.session_state.user_id, bytes_data, title)
     switch_page("main_notes")
-
-
-# def process_file():
-
-# # st.write("Learning Copilot 📚")
-# # st.button("Rejestracja")
-# # st.markdown('<div style="width: 100%; height: 100%; position: relative; background: white">', unsafe_allow_html=True)
 
