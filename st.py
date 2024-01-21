@@ -1,10 +1,11 @@
 import streamlit as st
 from streamlit_extras.switch_page_button import switch_page
-import src.app.auth_test as auth
-from mongo import DBClient
+# import src.app.auth_test as auth
+from src.app.mongo import DBClient
+from src.gpt.gptApi import gptManager
 
-if st.session_state.get('user_id', None) is None:
-    switch_page('login')
+# if st.session_state.get('user_id', None) is None:
+    # switch_page('login')
 
 st.set_page_config(
     initial_sidebar_state="collapsed",
@@ -21,8 +22,9 @@ st.markdown(
 """,
     unsafe_allow_html=True,
 )
-
+st.session_state.user_id="Client1"
 db_client = DBClient(config=st.secrets["mongo"])
+gpt_manager = gptManager(**st.secrets["gpt_api"])
 def clear_name():
     st.session_state.title = None
 
@@ -51,19 +53,17 @@ if home_button:
     switch_page("st")
 
 def get_doc(file_id, filename):
-    # print(file_id)
     st.session_state.title = filename
     st.session_state.file = db_client.get_one_pdf(file_id)
-    # switch_page("main_notes")
 
-notes_expander = sidebar.expander("NOTES")
-notes_expander_buttons = []
-for x in db_client.get_notes(st.session_state.user_id):
-    notes_expander_buttons.append(notes_expander.button(x['filename'], use_container_width=True, key=x["file_id"], on_click=get_doc, args=(x['file_id'],x['filename'])))
+# notes_expander = sidebar.expander("NOTES")
+# notes_expander_buttons = []
+# for x in db_client.get_notes(st.session_state.user_id):
+#     notes_expander_buttons.append(notes_expander.button(x['filename'], use_container_width=True, key=x["file_id"], on_click=get_doc, args=(x['file_id'],x['filename'])))
 
-# print(notes_expander_buttons)
-if any(notes_expander_buttons):
-    switch_page("main_notes")
+# if any(notes_expander_buttons):
+#     switch_page("main_notes")
+
 # quizes_expander = sidebar.expander("QUIZES")
 # for x in db_client.get_quizes("Client1"):
 #    quizes_expander.button(x['filename'], use_container_width=True, key=f'{x["filename"]}Quiz')
@@ -82,12 +82,13 @@ clicked_quiz = col2.button('Wygeneruj quiz', key='genQuiz', disabled=st.session_
 if uploaded is not None:
     st.session_state.file_uploaded=True
     bytes_data = uploaded.getvalue()
-    st.session_state.file = bytes_data
+    # st.session_state.file = bytes_data
 else:
     st.session_state.file_uploaded=False
 
 if clicked_notes:
     with st.spinner("Processing..."):
-       db_client.upload_notes(st.session_state.user_id, bytes_data, title)
+        st.session_state.file = gpt_manager.forward_read(uploaded, 'notes')
+    #    db_client.upload_notes(st.session_state.user_id, bytes_data.getvalue(), title)
     switch_page("main_notes")
 

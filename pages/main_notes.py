@@ -24,7 +24,7 @@ file = st.session_state.get('file', None)
 
 sidebar, body = st.columns([1, 10])
 
-home_button = sidebar.button('HOME', key='homeButton')
+home_button = sidebar.button('HOME', key='homeButton', use_container_width=True)
 
 if home_button:
     switch_page("st")
@@ -34,8 +34,8 @@ if file is not None:
     body.download_button(
         label="Pobierz notatki",
         data=file,
-        file_name=f"{st.session_state.get('title', 'notes')}.pdf",
-        mime='application/pdf',
+        file_name=f"{st.session_state.get('title', 'notes')}.tex",
+        mime='text/plain',
         # disabled=(file is not None)
     )
 else:

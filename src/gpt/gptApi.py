@@ -4,7 +4,7 @@ from pdfminer.converter import TextConverter
 from pdfminer.layout import LAParams
 from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
 from pdfminer.pdfpage import PDFPage
-from io import StringIO
+from io import StringIO, BufferedReader
 import re
 from openai import OpenAI
 
@@ -41,11 +41,37 @@ class gptManager:
     
     else:
       raise Exception(f"Error, mode can only be set to either 'quiz' or 'notes'")
+  
+  def forward_read(self,data:BufferedReader, mode:str):
+    # if file_name.endswith('.pdf'):
+    pages = self._process_pdf_data(data)
+    pages_generator = self._pagesGenerator(pages)
+
+    if mode == 'notes':
+      result = self._askChat(next(pages_generator),mode)
+      for page in pages_generator:
+        response = self._askChat(page,mode)
+        result = self._concatenateReponses(result,response)
+      result += '\n\end\{document\}'
+      self._save(result)
+      return result
+    
+    elif mode == 'quiz':
+      result = self._askChat(next(pages_generator),mode)
+      result = self._processQuiz(result)
+      for page in pages_generator:
+        response = self._askChat(page,mode)
+        response_processed = self._processQuiz(response)
+        result = self._concatenateQuizes(result,response_processed)
+      return result
+    
+    else:
+      raise Exception(f"Error, mode can only be set to either 'quiz' or 'notes'")
     
   def _process_pdf(self,file_name: str) -> list[str]:
     resource_manager = PDFResourceManager()
     fake_file_handle = StringIO()
-    converter = TextConverter(resource_manager, fake_file_handle,codec='utf-8', laparams=LAParams())
+    converter = TextConverter(resource_manager, fake_file_handle, laparams=LAParams())
     page_interpreter = PDFPageInterpreter(resource_manager, converter)
 
     pages = []
@@ -56,6 +82,25 @@ class gptManager:
             pages.append(text.replace('\n',''))
             fake_file_handle.truncate(0)
             fake_file_handle.seek(0)
+
+    converter.close()
+    fake_file_handle.close()
+    return pages
+  
+  def _process_pdf_data(self,data:BufferedReader) -> list[str]:
+    resource_manager = PDFResourceManager()
+    fake_file_handle = StringIO()
+    converter = TextConverter(resource_manager, fake_file_handle, laparams=LAParams())
+    page_interpreter = PDFPageInterpreter(resource_manager, converter)
+
+    pages = []
+    # with open(file_name, 'rb') as fh:
+    for page in PDFPage.get_pages(data, caching=True, check_extractable=True):
+        page_interpreter.process_page(page)
+        text = fake_file_handle.getvalue()
+        pages.append(text.replace('\n',''))
+        fake_file_handle.truncate(0)
+        fake_file_handle.seek(0)
 
     converter.close()
     fake_file_handle.close()
