@@ -19,18 +19,6 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-st.markdown(
-    """
-<style>
-button.st-emotion-cache-19rxjzo {
-    height: auto;
-    width: inherit;
-}
-</style>
-""",
-    unsafe_allow_html=True,
-)
-
 db_client = DBClient(config=st.secrets["mongo"])
 def clear_name():
     st.session_state.title = None
@@ -54,14 +42,28 @@ if 'genQuiz' not in st.session_state:
 
 sidebar, body = st.columns([1, 10])
 
-home_button = sidebar.button('HOME', key='homeButton')
+home_button = sidebar.button('HOME', key='homeButton', use_container_width=True)
 
 if home_button:
     switch_page("st")
 
+def get_doc(file_id, filename):
+    print(file_id)
+    st.session_state.title = filename
+    st.session_state.file = db_client.get_one_pdf(file_id)
+    # switch_page("main_notes")
+
 notes_expander = sidebar.expander("NOTES")
+notes_expander_buttons = []
 for x in db_client.get_notes("Client1"):
-   notes_expander.button(x['filename'])
+    notes_expander_buttons.append(notes_expander.button(x['filename'], use_container_width=True, key=x["file_id"], on_click=get_doc, args=(x['file_id'],x['filename'])))
+
+print(notes_expander_buttons)
+if any(notes_expander_buttons):
+    switch_page("main_notes")
+# quizes_expander = sidebar.expander("QUIZES")
+# for x in db_client.get_quizes("Client1"):
+#    quizes_expander.button(x['filename'], use_container_width=True, key=f'{x["filename"]}Quiz')
 
 body.markdown('<h1>Learning Copilot 📚</h1>', unsafe_allow_html=True)
 uploaded = body.file_uploader(label='Dodaj plik',on_change=upload_file, type=['pdf', 'pptx'])
@@ -71,8 +73,8 @@ if title is not None and title != '':
     st.session_state.title = title
 
 col1, col2 = body.columns(2)
-clicked_notes = col1.button('Wygeneruj notatki', key='genNotes', disabled=st.session_state.disabled)
-clicked_quiz = col2.button('Wygeneruj quiz', key='genQuiz', disabled=st.session_state.disabled)
+clicked_notes = col1.button('Wygeneruj notatki', key='genNotes', disabled=st.session_state.disabled,use_container_width=True)
+clicked_quiz = col2.button('Wygeneruj quiz', key='genQuiz', disabled=st.session_state.disabled,use_container_width=True)
 
 if uploaded is not None:
     st.session_state.file_uploaded=True

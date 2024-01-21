@@ -1,10 +1,5 @@
 from pymongo.mongo_client import MongoClient
-from pymongo.server_api import ServerApi
-import json
 from gridfs import GridFS
-
-# config = json.load(open("config.json"))
-
 
 
 class DBClient:
@@ -33,6 +28,13 @@ class DBClient:
         }
         collection.insert_one(metadata)
     
+    def get_one_pdf(self, file_id):
+        return self.fs.get(file_id).read()
+    
     def get_notes(self, id):
         collection = self.db[id]['notes']
+        return collection.find({})
+    
+    def get_quizes(self, id):
+        collection = self.db[id]['quizes']
         return collection.find({})
