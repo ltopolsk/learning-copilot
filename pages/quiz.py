@@ -104,7 +104,7 @@ def quiz_page(user_id, user_email):
                 {} \n
                 Poprawna odpowiedź to: {} \n
                 Twoja odpowiedź: {}
-            """.format(answer, q["correct_answer"], st.session_state['user_answer'][i-1])
+            """.format(answer, q["correct_answer"], st.session_state['user_answer'][i-1] if st.session_state['user_answer'][i-1] is not None else "Brak")
         )
 
     # Display the quiz
@@ -130,11 +130,11 @@ def quiz_page(user_id, user_email):
         )
         display_answers()
         st.session_state['score'] = 0
-        st.session_state['user_answer'] = [None] * len(questions);
+        st.session_state['user_answer'] = [None] * len(questions)
 
     if body.button("Reload"):
         st.session_state['score'] = 0
-        st.session_state['user_answer'] = [None] * len(questions);
+        st.session_state['user_answer'] = [None] * len(questions)
         st.rerun()
 
 run_page(quiz_page)
