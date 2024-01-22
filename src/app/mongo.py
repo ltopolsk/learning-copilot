@@ -21,9 +21,10 @@ class DBClient:
         else:
             self.upload_pdf(collection, pdf_content, filename)
     
-    def upload_quiz(self, id, pdf_content, filename):
+    def upload_quiz(self, id, quiz, quizname):
         collection = self.db[id]['quizes']
-        self.upload_pdf(collection, pdf_content, filename)
+        collection.insert_one({'name': quizname, 'quiz': quiz})
+        # self.upload_pdf(collection, pdf_content, filename)
 
     def upload_pdf(self, collection, pdf_content, filename):
         file_id = self.fs.put(pdf_content, filename=filename)
@@ -35,6 +36,9 @@ class DBClient:
     
     def get_one_pdf(self, user_id,filename):
         return self.db[user_id]['notes'].find_one({'filename': filename})
+    
+    def get_one_quiz(self, user_id, quizname):
+        return self.db[user_id]['quizes'].find_one({'name': quizname})['quiz']
     
     def get_notes(self, id):
         collection = self.db[id]['notes']
