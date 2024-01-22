@@ -1,8 +1,8 @@
 import streamlit as st
-import asyncio
-from httpx_oauth.clients.google import GoogleOAuth2
 from src.app.mongo import DBClient
 from src.gpt.gptApi import gptManager
+from src.app.auth import run_page
+from src.app.misc import render_sidebar
 from streamlit_extras.switch_page_button import switch_page
 
 st.set_page_config(
@@ -21,36 +21,11 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-
-async def write_authorization_url(client,
-                                  redirect_uri):
-    authorization_url = await client.get_authorization_url(
-        redirect_uri,
-        scope=["profile", "email"],
-        extras_params={"access_type": "online"},
-    )
-    return authorization_url
-
-
-async def write_access_token(client,
-                             redirect_uri,
-                             code):
-    token = await client.get_access_token(code, redirect_uri)
-    return token
-
-
-async def get_email(client,
-                    token):
-    user_id, user_email = await client.get_id_email(token)
-    return user_id, user_email
-
-
 def main(user_id, user_email):
     st.session_state.user_id=user_id
     db_client = DBClient(config=st.secrets["mongo"])
     gpt_manager = gptManager(**st.secrets["gpt_api"])
-    def clear_name():
-        st.session_state.title = None
+    st.session_state.db = db_client
 
     def disable():
         st.session_state.disabled = True
@@ -71,39 +46,7 @@ def main(user_id, user_email):
 
     sidebar, body = st.columns([1, 8])
 
-    home_button = sidebar.button('HOME', key='homeButton', use_container_width=True)
-
-    if home_button:
-        switch_page("st")
-
-    def get_doc(user_id, filename):
-        st.session_state.title = filename
-        st.session_state.file = db_client.get_one_pdf(user_id,filename)
-
-    notes_expander = sidebar.expander("NOTES")
-    notes_expander_buttons = []
-    for x in db_client.get_notes(st.session_state.user_id):
-        notes_expander_buttons.append(notes_expander.button(x['filename'], use_container_width=True, key=x["filename"]))
-
-    # if any(notes_expander_buttons):
-        # switch_page("main_notes")
-
-    def get_quiz(name):
-        st.session_state.quiz = db_client.get_one_quiz(st.session_state.user_id, name)
- 
-    quizes_expander = sidebar.expander("QUIZES")
-    quizes_expander_buttons = []
-    for x in db_client.get_quizes(st.session_state.user_id):
-       quizes_expander_buttons.append(quizes_expander.button(x['name'], use_container_width=True, key=f'{x["name"]}Quiz', on_click=get_quiz, args=(x['name'],)))
-
-    if any(quizes_expander_buttons):
-        switch_page("quiz")
-    
-    logout_button = sidebar.button('Wyloguj się', key='logoutButton', use_container_width=True)
-    if logout_button:
-        st.session_state.token = None
-        st.experimental_set_query_params()
-        st.rerun()
+    render_sidebar(sidebar)
 
     body.markdown('<h1>Learning Copilot 📚</h1>', unsafe_allow_html=True)
     uploaded = body.file_uploader(label='Dodaj plik',on_change=upload_file, type=['pdf'])
@@ -142,44 +85,5 @@ def main(user_id, user_email):
 
 
 if __name__ == '__main__':
-    client_id = st.secrets['google_auth']['client_id']
-    client_secret = st.secrets['google_auth']['client_secret']
-    redirect_uri = st.secrets['google_auth']['redirect_uri']
-
-    client = GoogleOAuth2(client_id, client_secret)
-    authorization_url = asyncio.run(
-        write_authorization_url(client=client,
-                                redirect_uri=redirect_uri)
-    )
-    session_state = st.session_state
-    if session_state.get('token', None) is None:
-        try:
-            code = st.experimental_get_query_params()['code']
-        except:
-            st.write(f'''<h1>Please login using Google account</h1>''',unsafe_allow_html=True)
-            st.link_button('Log in with google', url=authorization_url)
-        else:
-            # Verify token is correct:
-            try:
-                token = asyncio.run(
-                    write_access_token(client=client,
-                                       redirect_uri=redirect_uri,
-                                       code=code))
-            except:
-                st.write('''<h1>Please login using Google account</h1>''',unsafe_allow_html=True)
-                st.link_button('Log in with google', url=authorization_url)
-            else:
-                # Check if token has expired:
-                session_state.token = token
-                user_id, user_email = asyncio.run(
-                    get_email(client=client,
-                            token=token['access_token'])
-                    )
-                session_state.user_id = user_id
-                session_state.user_email = user_email
-                main(user_id=session_state.user_id,
-                         user_email=session_state.user_email)
-    else:
-        main(user_id=session_state.user_id,
-             user_email=session_state.user_email)
+    run_page(main)
 
