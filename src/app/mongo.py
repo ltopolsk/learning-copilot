@@ -15,7 +15,11 @@ class DBClient:
 
     def upload_notes(self, id, pdf_content, filename):
         collection = self.db[id]['notes']
-        self.upload_pdf(collection, pdf_content, filename)
+        print(type(pdf_content))
+        if type(pdf_content) == str:
+            collection.insert_one({'latex_note':pdf_content,'filename':filename})
+        else:
+            self.upload_pdf(collection, pdf_content, filename)
     
     def upload_quiz(self, id, pdf_content, filename):
         collection = self.db[id]['quizes']
@@ -29,8 +33,8 @@ class DBClient:
         }
         collection.insert_one(metadata)
     
-    def get_one_pdf(self, file_id):
-        return self.fs.get(file_id).read()
+    def get_one_pdf(self, user_id,filename):
+        return self.db[user_id]['notes'].find_one({'filename': filename})
     
     def get_notes(self, id):
         collection = self.db[id]['notes']

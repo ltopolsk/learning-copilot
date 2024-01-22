@@ -18,8 +18,6 @@ st.markdown(
 )
 
 
-
-# with open('data/MED_dokumentacja.pdf', "rb") as f:
 file = st.session_state.get('file', None)
 
 sidebar, body = st.columns([1, 10])
@@ -36,7 +34,6 @@ if file is not None:
         data=file,
         file_name=f"{st.session_state.get('title', 'notes')}.tex",
         mime='text/plain',
-        # disabled=(file is not None)
     )
 else:
     body.button(
