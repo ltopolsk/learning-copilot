@@ -1,7 +1,5 @@
 import streamlit as st
-import json
 from streamlit_extras.switch_page_button import switch_page
-from streamlit_js_eval import streamlit_js_eval
 
 st.set_page_config(
     initial_sidebar_state="collapsed",
@@ -40,11 +38,6 @@ if home_button:
     switch_page("st")
 
 body.markdown('<h1>Learning Copilot</h1>', unsafe_allow_html=True)
-# if quiz is not None:
-#     body.text(json.dumps(quiz, indent=4))
-# else:
-#     body.text("NOT QUIZZ")
-
 
 # Define quiz questions and answers
 questions = parse_quiz(st.session_state.get('quiz', None))
@@ -138,7 +131,6 @@ if body.button("Submit"):
         Twój rezultat: {}/{}
         """.format(st.session_state['score'], len(questions))
     )
-    # st.switch_page('pages/quiz_2.py')
     display_answers()
     st.session_state['score'] = 0
     st.session_state['user_answer'] = [None] * len(questions);
@@ -147,4 +139,3 @@ if body.button("Reload"):
     st.session_state['score'] = 0
     st.session_state['user_answer'] = [None] * len(questions);
     st.rerun()
-    # streamlit_js_eval(js_expressions="parent.window.location.reload()")
