@@ -42,14 +42,23 @@ class gptManager:
     else:
       raise Exception(f"Error, mode can only be set to either 'quiz' or 'notes'")
   
-  def forward_read(self,data:BufferedReader, mode:str):
+  def forward_read(self,data:BufferedReader, mode:str, callback=None):
     # if file_name.endswith('.pdf'):
     pages = self._process_pdf_data(data)
     pages_generator = self._pagesGenerator(pages)
-
+    if callback:
+      pages_generator_copy = self._pagesGenerator(pages)
+      gen_size = len(list(pages_generator_copy))
+    
     if mode == 'notes':
       result = self._askChat(next(pages_generator),mode)
+      if callback:
+        num_pages = 1
+        callback(num_pages/gen_size)
       for page in pages_generator:
+        if callback:
+          num_pages += 1
+          callback(num_pages/gen_size)
         response = self._askChat(page,mode)
         result = self._concatenateReponses(result,response)
       result += '\n\end\{document\}'
@@ -59,7 +68,13 @@ class gptManager:
     elif mode == 'quiz':
       result = self._askChat(next(pages_generator),mode)
       result = self._processQuiz(result)
+      if callback:
+        num_pages = 1
+        callback(num_pages/gen_size)
       for page in pages_generator:
+        if callback:
+          num_pages += 1
+          callback(num_pages/gen_size)
         response = self._askChat(page,mode)
         response_processed = self._processQuiz(response)
         result = self._concatenateQuizes(result,response_processed)
@@ -122,7 +137,7 @@ class gptManager:
     quiz_main['correct'].extend(quiz_to_add['correct'])
     return quiz_main
 
-  def _pagesGenerator(self,pages, limit = 1000):
+  def _pagesGenerator(self,pages, limit=1000):
     text =''
     sum_signs = 0
     for page in pages[:self.limit_pages]:
