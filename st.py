@@ -142,7 +142,9 @@ if __name__ == '__main__':
             code = st.experimental_get_query_params()['code']
         except:
             st.write(f'''<h1>Please login using Google account</h1>''',unsafe_allow_html=True)
-            st.write(f'<a href="{authorization_url}" target="_self"> Log in with google </a>', unsafe_allow_html=True)
+            if st.button('Log in with google'):
+                st.markdown(f"""<meta http-equiv="refresh" content="0; url='{authorization_url}'" />""",
+                            unsafe_allow_html=True)
         else:
             # Verify token is correct:
             try:
@@ -152,7 +154,9 @@ if __name__ == '__main__':
                                        code=code))
             except:
                 st.write('''<h1>Please login using Google account</h1>''',unsafe_allow_html=True)
-                st.markdown(f'<a href="{authorization_url}" target="_self"> Log in with google </a>', unsafe_allow_html=True)
+                if st.button('Log in with google'):
+                    st.markdown(f"""<meta http-equiv="refresh" content="0; url='{authorization_url}'" />""",
+                                unsafe_allow_html=True)
             else:
                 # Check if token has expired:
                 session_state.token = token
