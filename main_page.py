@@ -2,7 +2,7 @@ import streamlit as st
 from src.app.mongo import DBClient
 from src.gpt.gptApi import gptManager
 from src.app.auth import run_page
-from src.app.misc import render_sidebar
+from src.app.misc import render_sidebar, render_pdf
 from streamlit_extras.switch_page_button import switch_page
 
 st.set_page_config(
@@ -62,8 +62,6 @@ def main(user_id, user_email):
 
     if uploaded is not None:
         st.session_state.file_uploaded=True
-        # bytes_data = uploaded.getbuffer()
-        # st.session_state.file = bytes_data
     else:
         st.session_state.file_uploaded=False
 
@@ -73,9 +71,12 @@ def main(user_id, user_email):
         def progress(percent):
             with result_holder.container():
                 st.progress(percent, f"Generowanie quizu {percent*100:.0f}%")
-        st.session_state.file = gpt_manager.forward_read(uploaded, 'notes', callback=progress)
+        md_content =gpt_manager.forward_read(uploaded, 'notes_markdown', callback=progress)
+        st.session_state.file = render_pdf(md_content)
         if save_result:
-            db_client.upload_notes(st.session_state.user_id, st.session_state.file, title)
+            db_client.upload_notes(st.session_state.user_id, st.session_state.file, md_content, title)
+        # with open('wyklad.md') as f:
+        #     st.session_state.file = f.read()
         switch_page("notes")
     if clicked_quiz:
         result_holder = st.empty()
