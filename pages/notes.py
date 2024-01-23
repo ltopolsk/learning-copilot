@@ -37,7 +37,6 @@ def notes_page(user_id, user_email):
 
     body.markdown('<h1>Learning Copilot 📚</h1>', unsafe_allow_html=True)
     if file is not None:
-        # body.markdown(file, unsafe_allow_html=True)
         display_pdf(file)
         body.download_button(
             label="Pobierz notatki",

@@ -1,10 +1,6 @@
 import asyncio
-
 import streamlit as st
 from httpx_oauth.clients.google import GoogleOAuth2
-
-
-
 
 async def write_authorization_url(client,
                                   redirect_uri):
