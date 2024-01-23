@@ -43,8 +43,8 @@ def run_page(page):
         try:
             code = st.experimental_get_query_params()['code']
         except:
-            st.write(f'''<h1>Please login using Google account</h1>''',unsafe_allow_html=True)
-            st.link_button('Log in with google', url=authorization_url)
+            st.write('''<h1>Learning Copilot 📚</h1>''',unsafe_allow_html=True)
+            st.link_button('Zaloguj sie z użyciem konta Google', url=authorization_url)
         else:
             # Verify token is correct:
             try:
@@ -53,8 +53,8 @@ def run_page(page):
                                        redirect_uri=redirect_uri,
                                        code=code))
             except:
-                st.write('''<h1>Please login using Google account</h1>''',unsafe_allow_html=True)
-                st.link_button('Log in with google', url=authorization_url)
+                st.write('''<h1>Learning Copilot 📚</h1>''',unsafe_allow_html=True)
+                st.link_button('Zaloguj sie z użyciem konta Google', url=authorization_url)
             else:
                 st.session_state.token = token
                 user_id, user_email = asyncio.run(
