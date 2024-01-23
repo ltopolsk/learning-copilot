@@ -14,6 +14,7 @@ class gptManager:
     self.assistant_id_notes = assistant_id_notes
     self.assistant_id_quiz = assistant_id_quiz
     self.limit_pages = 5
+    self.quiz_map = {'a':0,'b':1,'c':2,'d':3}
 
   def forward(self,file_name:str, mode:str):
     if file_name.endswith('.pdf'):
@@ -61,14 +62,21 @@ class gptManager:
     fake_file_handle.close()
     return pages
   
-  def _processQuiz(self,quiz:str):
+  def processQuiz(self,quiz:str):
     result = {'question':[],'answers':[],'correct':[]}
     questions = quiz.split('\n\n')
+    
     for question in questions:
         lines = question.split('\n')
-        result['question'].append(lines[0])
-        result['answers'].append(lines[1:4])
-        result['correct'].append(lines[-1].replace("Poprawna: ",''))
+        pattern = r'Poprawna: (\w)'
+        ans = re.search(pattern, lines[-1])
+        answers = [lines[1].replace('a. ',''),lines[2].replace('b. ',''),lines[3].replace('c. ',''),lines[4].replace('d. ','')]
+        if ans:
+            result['question'].append(lines[0])
+            result['answers'].append(answers)
+            result['correct'].append(answers[self.quiz_map[ans.group(1)]])
+        else:
+            continue
     return result
   
   def _concatenateQuizes(self,quiz_main,quiz_to_add):
@@ -149,5 +157,5 @@ class gptManager:
 
 if __name__ == '__main__':
   print(os.listdir('../'))
-  gpt = gptManager('TOUPDATE','asst_1hmFCTKpuOC3WmmRzbL78Yte','asst_Lb3RWc77sIsdunncnkgKZtfX' )
+  gpt = gptManager('TOUPDATE','asst_1hmFCTKpuOC3WmmRzbL78Yte','asst_gWFzDPwpOqJ8xgfnPlE2wTZ9' )
   print(gpt.forward('FPP-wyklad.pdf',mode = 'quiz'))
