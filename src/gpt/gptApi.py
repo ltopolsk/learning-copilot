@@ -164,7 +164,7 @@ class gptManager:
     quiz_main['correct'].extend(quiz_to_add['correct'])
     return quiz_main
 
-  def _pagesGenerator(self,pages, limit=1000):
+  def _pagesGenerator(self,pages, limit=4000):
     text =''
     sum_signs = 0
     for page in pages[:self.limit_pages]:
