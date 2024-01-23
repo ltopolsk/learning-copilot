@@ -44,36 +44,47 @@ def display_quiz():
         st.session_state['user_answer'][i-1] = st.radio("Wybierz poprawną odpowiedź:", q["options"], index=None)
         print(i)
         print(st.session_state['user_answer'])
-
-        # if user_answer == q["correct_answer"]:
-        #     st.session_state['score'] += 1
-            # score += 1
-# Function to display and process the quiz
+            
 def display_answers():
+    background_color = "#add8e6"
     st.markdown(
-        """
-        ## Answers
-        """
-    )
+    """
+    ## Answers
+    """
+)
     for i, q in enumerate(questions, start=1):
         answer = ""
         st.subheader(f"Pytanie {i}: {q['question']}")
         if st.session_state['correct'][i-1] == 1:
-            answer = "Brawo, to poprawna odpowiedź" +  '\u2714'
+            answer = "Brawo, Twoja odpowiedź jest poprawna   " +  '\u2714'
+            background_color = "#90EE90"
         if st.session_state['correct'][i-1] == -1:
             answer = "Brak odpowiedzi"
+            background_color = "#D3D3D3"
+
         if st.session_state['correct'][i-1] == 0:
             answer = "Twoja odpowiedź jest błędna   " +  '\u2716'
-        st.markdown(
-        """
-            {} \n
-            Poprawna odpowiedź to: {} \n
-            Twoja odpowiedź: {}
-        """.format(answer, q["correct_answer"], st.session_state['user_answer'][i-1])
-    )
+            background_color = "#FFA07A"
 
+        corr = q["correct_answer"]
+        user_an = st.session_state['user_answer'][i-1]
+        colored_box = f"""
+    <div style="
+        background-color: {background_color};
+        padding: 20px;
+        border-radius: 10px;
+        text-align: left;
+    ">
+        <p style="color: white;">{answer}</p>
+        <p style="color: white;">Poprawna odpowiedź to: {corr}</p>
+        <p style="color: white;">Twoja odpowiedź: {user_an}</p>
+    </div>
+# """
+        st.markdown(colored_box, unsafe_allow_html=True)
+
+###
 # Streamlit app
-st.title("GPT-Based Quiz App")
+st.title("Learning Copilot Quiz")
 
 # Display the quiz
 display_quiz()
@@ -106,4 +117,6 @@ if st.button("Reload"):
     st.session_state['user_answer'] = [None] * len(questions);
     st.rerun()
     streamlit_js_eval(js_expressions="parent.window.location.reload()")
+
+
 
