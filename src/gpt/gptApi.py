@@ -171,3 +171,4 @@ if __name__ == '__main__':
   print(os.listdir('../'))
   gpt = gptManager('TODO','asst_1hmFCTKpuOC3WmmRzbL78Yte','asst_gWFzDPwpOqJ8xgfnPlE2wTZ9','asst_Ovdhi8eA6BQIx3NqpiQj3TMM' )
   print(gpt.forward('FPP-wyklad.pdf',mode = 'notes_markdown'),file=open('wyklad.md','w'))
+  print('DONE')
