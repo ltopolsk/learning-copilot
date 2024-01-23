@@ -9,10 +9,11 @@ import re
 from openai import OpenAI
 
 class gptManager:
-  def __init__(self, api_key:str,assistant_id_notes:str,assistant_id_quiz:str):
+  def __init__(self, api_key:str,assistant_id_notes:str,assistant_id_quiz:str,assistant_id_notes_markdown:str):
     self.api_key = api_key
     self.assistant_id_notes = assistant_id_notes
     self.assistant_id_quiz = assistant_id_quiz
+    self.assistant_id_notes_markdown = assistant_id_notes_markdown
     self.limit_pages = 5
     self.quiz_map = {'a':0,'b':1,'c':2,'d':3}
 
@@ -22,13 +23,19 @@ class gptManager:
 
     pages_generator = self._pagesGenerator(pages)
 
-    if mode == 'notes':
+    if mode == 'notes_latex':
       result = self._askChat(next(pages_generator),mode)
       for page in pages_generator:
         response = self._askChat(page,mode)
         result = self._concatenateReponses(result,response)
       result += '\n\end\{document\}'
       self._save(result)
+      return result
+    
+    elif mode == 'notes_markdown':
+      result = self._askChat(next(pages_generator),mode)
+      for page in pages_generator:
+        result += self._askChat(page,mode)
       return result
     
     elif mode == 'quiz':
@@ -109,10 +116,15 @@ class gptManager:
             }
         ]
     )
-    if mode == 'notes':
+    if mode == 'notes_latex':
       run = client.beta.threads.runs.create(
       thread_id=thread.id,
       assistant_id=self.assistant_id_notes
+      )
+    elif mode == 'notes_markdown':
+      run = client.beta.threads.runs.create(
+      thread_id=thread.id,
+      assistant_id=self.assistant_id_notes_markdown
       )
     elif mode == 'quiz':
       run = client.beta.threads.runs.create(
@@ -157,5 +169,5 @@ class gptManager:
 
 if __name__ == '__main__':
   print(os.listdir('../'))
-  gpt = gptManager('TOUPDATE','asst_1hmFCTKpuOC3WmmRzbL78Yte','asst_gWFzDPwpOqJ8xgfnPlE2wTZ9' )
-  print(gpt.forward('FPP-wyklad.pdf',mode = 'quiz'))
+  gpt = gptManager('TODO','asst_1hmFCTKpuOC3WmmRzbL78Yte','asst_gWFzDPwpOqJ8xgfnPlE2wTZ9','asst_Ovdhi8eA6BQIx3NqpiQj3TMM' )
+  print(gpt.forward('FPP-wyklad.pdf',mode = 'notes_markdown'),file=open('wyklad.md','w'))
