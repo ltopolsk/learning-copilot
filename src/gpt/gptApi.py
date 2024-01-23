@@ -13,7 +13,7 @@ class gptManager:
     self.assistant_id_notes = assistant_id_notes
     self.assistant_id_quiz = assistant_id_quiz
     self.assistant_id_notes_markdown = assistant_id_notes_markdown
-    self.limit_pages = 5
+    self.limit_pages = 10
     self.quiz_map = {'a':0,'b':1,'c':2,'d':3}
 
   def forward(self,data:BufferedReader, mode:str, callback=None):
