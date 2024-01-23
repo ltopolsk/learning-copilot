@@ -13,28 +13,32 @@ class DBClient:
     def get_db(self):
         return self.db
 
-    def upload_notes(self, id, pdf_content, filename):
+    def upload_notes(self, id, pdf_content, md_content, title):
         collection = self.db[id]['notes']
-        print(type(pdf_content))
-        if type(pdf_content) == str:
-            collection.insert_one({'latex_note':pdf_content,'filename':filename})
-        else:
-            self.upload_pdf(collection, pdf_content, filename)
+        metadata = {
+            'title': title,
+            'md_notes': md_content
+        }
+        self._upload_pdf(collection, pdf_content, metadata)
     
     def upload_quiz(self, id, quiz, quizname):
         collection = self.db[id]['quizes']
         collection.insert_one({'name': quizname, 'quiz': quiz})
 
-    def upload_pdf(self, collection, pdf_content, filename):
-        file_id = self.fs.put(pdf_content, filename=filename)
-        metadata = {
-            'filename': filename,
+    def _upload_pdf(self, collection, pdf_content, metadata):
+        file_id = self.fs.put(pdf_content, filename=metadata['title'])
+        meta = {
+            **metadata,
             'file_id': file_id
         }
-        collection.insert_one(metadata)
-    
+        collection.insert_one(meta)
+
+    def _get_one_pdf(self, file_id):
+        return self.fs.get(file_id).read()
+
     def get_one_notes(self, user_id, notes_id):
-        return self.db[user_id]['notes'].find_one({'_id': notes_id})
+        metadata = self.db[user_id]['notes'].find_one({'_id': notes_id})
+        return {**metadata, 'file':self._get_one_pdf(metadata['file_id'])}
     
     def get_one_quiz(self, user_id, quiz_id):
         return self.db[user_id]['quizes'].find_one({'_id': quiz_id})

@@ -1,5 +1,6 @@
 import streamlit as st
 from streamlit_extras.switch_page_button import switch_page
+from md2pdf.core import HTML, markdown, CSS
 
 def render_sidebar(sidebar):
     home_button = sidebar.button('HOME', key='homeButton', use_container_width=True)
@@ -9,13 +10,13 @@ def render_sidebar(sidebar):
 
     def get_notes(notes_id):
         notes = st.session_state.db.get_one_notes(st.session_state.user_id, notes_id)
-        st.session_state.file = notes['latex_note']
-        st.session_state.title = notes['filename']
+        st.session_state.file = notes['file']
+        st.session_state.title = notes['title']
 
     notes_expander = sidebar.expander("NOTES")
     notes_expander_buttons = []
     for x in st.session_state.db.get_notes(st.session_state.user_id):
-        notes_expander_buttons.append(notes_expander.button(x['filename'], use_container_width=True, key=f'{x["_id"]}_notes', on_click=get_notes, args=(x['_id'],)))
+        notes_expander_buttons.append(notes_expander.button(x['title'], use_container_width=True, key=f'{x["_id"]}_notes', on_click=get_notes, args=(x['_id'],)))
 
     if any(notes_expander_buttons):
         switch_page("notes")
@@ -35,3 +36,9 @@ def render_sidebar(sidebar):
     if logout_button:
         st.session_state.token = None
         st.rerun()
+
+def render_pdf(md_content):
+    html = HTML(string=markdown(md_content, extras=['fenced-code-blocks', 'cuddled-lists']))
+    font = CSS(string="body{font-family: Arial, sans-serif;}")
+    x= html.render(stylesheets=[font])
+    return x.write_pdf()
