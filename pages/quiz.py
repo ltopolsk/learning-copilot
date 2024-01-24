@@ -21,14 +21,10 @@ st.markdown(
 
 def parse_quiz(data_dict):
     questions = []
-    # if(len(data_dict['question']) == len(data_dict['answers'] == data_dict['correct'])):
-    # print(data_dict)
     for i in range(len(data_dict['question'])): 
         answers = []
         for q in data_dict['answers'][i]:
             answers.append(q)
-            # if(data_dict['correct'][i]==q):
-                # print("Match for question ", i)
         questions.append({'question': data_dict['question'][i], 'options': answers, 'correct_answer': data_dict['correct'][i]})
     return questions
 
@@ -42,16 +38,12 @@ def quiz_page(user_id, user_email):
     # Define quiz questions and answers
     questions = parse_quiz(st.session_state.quiz)
 
-    # if 'score' not in st.session_state:
     st.session_state['score'] = 0
 
-    # if 'user_answer' not in st.session_state:
     st.session_state['user_answer'] = [0] * len(questions)
         
-    # if 'disabled' not in st.session_state:
     st.session_state['disabled'] = False
 
-    # if 'correct' not in st.session_state:
     st.session_state['correct'] = [0] * len(questions)
 
     # Function to display and process the quiz
