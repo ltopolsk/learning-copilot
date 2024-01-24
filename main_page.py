@@ -72,6 +72,7 @@ def main(user_id, user_email):
             with result_holder.container():
                 st.progress(percent, f"Generowanie notatek {percent*100:.0f}%")
         md_content =gpt_manager.forward(uploaded, 'notes_markdown', callback=progress)
+        st.session_state.md_notes = md_content
         st.session_state.file = render_pdf(md_content)
         if save_result:
             db_client.upload_notes(st.session_state.user_id, st.session_state.file, md_content, title)
