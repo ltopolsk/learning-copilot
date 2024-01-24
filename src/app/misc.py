@@ -28,7 +28,7 @@ def render_sidebar(sidebar):
         notes = st.session_state.db.get_one_notes(st.session_state.user_id, notes_id)
         st.session_state.file = notes['file']
         st.session_state.title = notes['title']
-        st.session_state.md_content = notes['md_notes']
+        st.session_state.md_notes = notes['md_notes']
 
     notes_expander = sidebar.expander("Notatki")
     notes_expander_buttons = []
