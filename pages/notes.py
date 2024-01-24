@@ -30,7 +30,8 @@ def notes_page(user_id, user_email):
 
         pdf_display = f'<iframe src="data:application/pdf;base64,{base64_pdf}" width="100%" height="1000" type="application/pdf"></iframe>'
 
-        body.markdown(pdf_display, unsafe_allow_html=True)
+        body.write(pdf_display, unsafe_allow_html=True)
+        body.write('<p>&nbsp;</p>', unsafe_allow_html=True)
 
     render_sidebar(sidebar)
 
