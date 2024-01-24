@@ -36,6 +36,7 @@ def notes_page(user_id, user_email):
     render_sidebar(sidebar)
 
     body.markdown('<h1>Learning Copilot 📚</h1>', unsafe_allow_html=True)
+    body.markdown('Learning Copilot przyjmuje wykłady w formacie pdf i odczytuje tekst - nie potrafi interpretować obrazów. Ilość wygenerowanych notatek zależy od treścliwości stron wczytanego dokumentu.')
     if md_notes is not None:
         body.markdown(md_notes, unsafe_allow_html=True)
 

@@ -49,6 +49,7 @@ def main(user_id, user_email):
     render_sidebar(sidebar)
 
     body.markdown('<h1>Learning Copilot 📚</h1>', unsafe_allow_html=True)
+    body.markdown('Learning Copilot przyjmuje wykłady w formacie pdf i odczytuje tekst - nie potrafi interpretować obrazów. Ilość wygenerowanych notatek bądź długość quizu zależy od treścliwości stron wczytanego dokumentu.')
     uploaded = body.file_uploader(label='Dodaj plik',on_change=upload_file, type=['pdf'])
     title = body.text_input('Wprowadź tytuł notatek/quizu')
 

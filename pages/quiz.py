@@ -34,7 +34,7 @@ def quiz_page(user_id, user_email):
     render_sidebar(sidebar)
 
     body.markdown('<h1>Learning Copilot 📚</h1>', unsafe_allow_html=True)
-
+    body.markdown('Learning Copilot przyjmuje wykłady w formacie pdf i odczytuje tekst - nie potrafi interpretować obrazów. Liczba pytań quizu zależy od treścliwości stron wczytanego dokumentu.')
     # Define quiz questions and answers
     questions = parse_quiz(st.session_state.quiz)
 
