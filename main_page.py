@@ -68,9 +68,12 @@ def main(user_id, user_email):
     
     if clicked_notes:
         result_holder = body.empty()
+        result_holder.markdown("### Tworzenie notatek: 0%")
+        result_holder.progress(0)
         def progress(percent):
             with result_holder.container():
-                st.progress(percent, f"Generowanie notatek {percent*100:.0f}%")
+                st.markdown(f"### Tworzenie notatek: {percent*100:.0f}%")
+                st.progress(percent)
         md_content =gpt_manager.forward(uploaded, 'notes_markdown', callback=progress)
         st.session_state.md_notes = md_content
         st.session_state.file = render_pdf(md_content)
@@ -79,10 +82,12 @@ def main(user_id, user_email):
         switch_page("notes")
     if clicked_quiz:
         result_holder = body.empty()
-        result_holder.progress(0, "Generowanie quizu")
+        result_holder.markdown("### Tworzenie quizu: 0%")
+        result_holder.progress(0)
         def progress(percent):
             with result_holder.container():
-                st.progress(percent, f"Generowanie quizu {percent*100:.0f}%")
+                st.markdown(f"### Tworzenie quizu: {percent*100:.0f}%")
+                st.progress(percent)
     
         st.session_state.quiz = gpt_manager.forward(uploaded, 'quiz', callback=progress)
         if save_result:
