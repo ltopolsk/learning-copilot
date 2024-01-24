@@ -2,7 +2,7 @@ import streamlit as st
 from src.app.auth import run_page
 from src.app.misc import render_sidebar
 import base64
-
+from streamlit.components.v1 import html
 
 st.set_page_config(
     initial_sidebar_state="collapsed",
@@ -28,7 +28,7 @@ def notes_page(user_id, user_email):
     def display_pdf(file):
         base64_pdf = base64.b64encode(file).decode('utf-8')
 
-        pdf_display = f'<embed src="data:application/pdf;base64,{base64_pdf}" width="100%" height="1000"></embed>'
+        pdf_display = f'<iframe src="data:application/pdf;base64,{base64_pdf}" width="100%" height="1000" type="application/pdf"></iframe>'
 
         body.markdown(pdf_display, unsafe_allow_html=True)
 
